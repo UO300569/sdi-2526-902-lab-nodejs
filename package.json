@@ -3,7 +3,8 @@
   "description": "Tienda de música",
   "version": "1.0.0",
   "dependencies": {
-    "express": "^4.18.3"
+    "express": "^4.18.3",
+    "swig": "^1.4.2"
   },
   "devDependencies": {
     "@types/jest": "^29.2.5",
