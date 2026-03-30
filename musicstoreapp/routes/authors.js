@@ -6,6 +6,20 @@ module.exports = function(app) {
         { name: "Autor 3", group: "Grupo 3", rol: "flautista" }
     ]
 
+    app.get('/authors/filter/:role', function (req, res) {
+        let role = req.params.role;
+        let filteredAuthors = [];
+
+        for (let i = 0; i < authors.length; i++) {
+            let author = authors[i];
+            if (author.rol === role) {
+                filteredAuthors.push(author);
+            }
+        }
+
+        res.render("authors/authors.twig", { authors: filteredAuthors });
+    });
+
     app.get('/authors', function(req, res) {
        res.render('authors/authors.twig', {authors: authors});
     });
