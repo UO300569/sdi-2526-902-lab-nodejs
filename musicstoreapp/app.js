@@ -3,20 +3,18 @@ let express = require('express');
 let path = require('path');
 let cookieParser = require('cookie-parser');
 let logger = require('morgan');
+let bodyParser = require('body-parser');
 
 let indexRouter = require('./routes/index');
 let usersRouter = require('./routes/users');
 
 let app = express();
 
-let bodyParser = require('body-parser');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-let swig = require('swig');
-require("./routes/songs.js")(app, swig);
-
 require("./routes/songs.js")(app);
+require("./routes/authors.js")(app);
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
