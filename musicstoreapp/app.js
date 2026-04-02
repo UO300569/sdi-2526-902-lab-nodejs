@@ -23,6 +23,13 @@ app.set('crypto', crypto);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 
+const userSessionRouter = require('./routes/userSessionRouter');
+const userAudiosRouter = require('./routes/userAudiosRouter');
+app.use("/songs/add", userSessionRouter);
+app.use("/publications", userSessionRouter);
+app.use("/audios/", userAudiosRouter);
+app.use("/shop/", userSessionRouter)
+
 const {MongoClient} = require("mongodb");
 const connectionStrings = 'mongodb+srv://admin:sdi@musicstoreapp.zhlojqd.mongodb.net/?appName=musicstoreapp';
 const dbClient = new MongoClient(connectionStrings);
