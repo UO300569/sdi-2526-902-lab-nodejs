@@ -31,6 +31,10 @@ app.use("/audios/", userAudiosRouter);
 app.use("/shop/", userSessionRouter)
 app.use("/songs/favorites", userSessionRouter);
 
+const userAuthorRouter = require('./routes/userAuthorRouter');
+app.use("/songs/edit",userAuthorRouter);
+app.use("/songs/delete",userAuthorRouter);
+
 const {MongoClient} = require("mongodb");
 const connectionStrings = 'mongodb+srv://admin:sdi@musicstoreapp.zhlojqd.mongodb.net/?appName=musicstoreapp';
 const dbClient = new MongoClient(connectionStrings);

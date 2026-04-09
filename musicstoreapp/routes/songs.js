@@ -114,7 +114,7 @@ module.exports = function (app, songsRepository) {
         } else {
             step2UpdateAudio(files, songId, callback); // SIGUIENTE
         }
-    };
+    }
 
     function step2UpdateAudio(files, songId, callback) {
         if (files && files.audio != null) {
@@ -129,7 +129,20 @@ module.exports = function (app, songsRepository) {
         } else {
             callback(true); // FIN
         }
-    };
+    }
+
+    app.get('/songs/delete/:id', function (req, res) {
+        let filter = {_id: new ObjectId(req.params.id)};
+        songsRepository.deleteSong(filter, {}).then(result => {
+            if (result === null || result.deletedCount === 0) {
+                res.send("No se ha podido eliminar el registro");
+            } else {
+                res.redirect("/publications");
+            }
+        }).catch(error => {
+            res.send("Se ha producido un error al intentar eliminar la canción: " + error)
+        });
+    })
 
     app.get('/songs/:id', function (req, res) {
         let filter = {_id: new ObjectId(req.params.id)};
@@ -168,6 +181,5 @@ module.exports = function (app, songsRepository) {
             res.send("Se ha producido un error al listar las publicaciones del usuario:" + error)
         });
     })
-
 }
 ;
