@@ -2,6 +2,16 @@ module.exports = {
     mongoClient: null, app: null, database: "musicStore", collectionName: "songs", init: function (app, dbClient) {
         this.dbClient = dbClient;
         this.app = app;
+    }, buySong: async function (shop) {
+        try {
+            await this.dbClient.connect();
+            const database = this.dbClient.db(this.database);
+            const purchasesCollection = database.collection('purchases');
+            const result = await purchasesCollection.insertOne(shop);
+            return result;
+        } catch (error) {
+            throw (error);
+        }
     }, deleteSong: async function (filter, options) {
         try {
             await this.dbClient.connect();
@@ -53,5 +63,15 @@ module.exports = {
                     .catch(err => callbackFunction({error: err.message}));
             })
             .catch(err => callbackFunction({error: err.message}))
-    }
+    }, getPurchases: async function (filter, options) {
+        try {
+            await this.dbClient.connect();
+            const database = this.dbClient.db(this.database);
+            const purchasesCollection = database.collection('purchases');
+            const purchases = await purchasesCollection.find(filter, options).toArray();
+            return purchases;
+        } catch (error) {
+            throw (error);
+        }
+    },
 };
