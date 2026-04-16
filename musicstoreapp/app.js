@@ -8,6 +8,13 @@ let bodyParser = require('body-parser');
 let indexRouter = require('./routes/index');
 
 let app = express();
+app.use(logger('dev'));
+app.use(express.json());
+app.use(express.urlencoded({extended: false}));
+app.use(cookieParser());
+app.use(express.static(path.join(__dirname, 'public')));
+let jwt = require('jsonwebtoken');
+app.set('jwt', jwt);
 let expressSession = require('express-session');
 app.use(expressSession({secret: 'abcdefg', resave: true, saveUninitialized: true}));
 let crypto = require('crypto');
@@ -27,15 +34,18 @@ const userSessionRouter = require('./routes/userSessionRouter');
 const userAudiosRouter = require('./routes/userAudiosRouter');
 app.use("/songs/add", userSessionRouter);
 app.use("/publications", userSessionRouter);
-app.use("/songs/buy",userSessionRouter);
-app.use("/purchases",userSessionRouter);
+app.use("/songs/buy", userSessionRouter);
+app.use("/purchases", userSessionRouter);
 app.use("/audios/", userAudiosRouter);
 app.use("/shop/", userSessionRouter)
 app.use("/songs/favorites", userSessionRouter);
 
 const userAuthorRouter = require('./routes/userAuthorRouter');
-app.use("/songs/edit",userAuthorRouter);
-app.use("/songs/delete",userAuthorRouter);
+app.use("/songs/edit", userAuthorRouter);
+app.use("/songs/delete", userAuthorRouter);
+
+const userTokenRouter = require('./routes/userTokenRouter');
+app.use("/api/v1.0/songs/", userTokenRouter);
 
 const {MongoClient} = require("mongodb");
 const connectionStrings = 'mongodb+srv://admin:sdi@musicstoreapp.zhlojqd.mongodb.net/?appName=musicstoreapp';
@@ -52,7 +62,7 @@ usersRepository.init(app, dbClient);
 
 require("./routes/songs/favorites.js")(app, favoriteSongsRepository, songsRepository)
 require("./routes/songs.js")(app, songsRepository);
-require("./routes/api/songsAPIv1.0.js")(app, songsRepository);
+require("./routes/api/songsAPIv1.0.js")(app, songsRepository, usersRepository);
 require("./routes/authors.js")(app, songsRepository);
 require("./routes/users.js")(app, usersRepository);
 
@@ -60,11 +70,7 @@ require("./routes/users.js")(app, usersRepository);
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'twig');
 
-app.use(logger('dev'));
-app.use(express.json());
-app.use(express.urlencoded({extended: false}));
-app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
+
 
 app.use('/', indexRouter);
 
