@@ -190,23 +190,60 @@ module.exports = function (app, songsRepository) {
 
     app.get('/songs/:id', function (req, res) {
         let songId = new ObjectId(req.params.id);
-        let filter = {_id: new ObjectId(req.params.id)};
+        let user = req.session.user;
+        let filter = {_id: songId};
         let options = {};
         songsRepository.findSong(filter, options).then(song => {
-            let isAuthor = (song.author === req.session.user);
-
-            let purchaseFilter = {user: req.session.user, song_id: songId};
-            songsRepository.getPurchases(purchaseFilter, options).then(purchases => {
-                let isPurchased = purchases.length > 0;
-                res.render("songs/song.twig", {
-                    song: song,
-                    canBuy: !isAuthor && !isPurchased
-                });
+            userCanBuySong(user, songId, function (canBuySong) {
+                let settings = {
+                    url: "https://api.currencyapi.com/v3/latest?apikey=cur_live_cJrWx1r24fEKM9GnlblIXXiLHNeeLcXIFYnt7IwH&base_currency=EUR&currencies=USD",
+                    method: "get",
+                }
+                let rest = app.get("rest");
+                rest(settings, function (error, response, body) {
+                    console.log("cod: " + response.statusCode + " Cuerpo :" + body);
+                    let responseObject = JSON.parse(body);
+                    let rateUSD = responseObject.data.USD.value; // nuevo campo "usd" redondeado a dos decimales
+                    let songValue = song.price * rateUSD
+                    song.usd = Math.round(songValue * 100) / 100;
+                    res.render("songs/song.twig", {song: song, canBuySong: canBuySong});
+                })
             })
         }).catch(error => {
             res.send("Se ha producido un error al buscar la canción " + error)
         });
-    })
+    });
+
+    function userCanBuySong(user, songId, callback) {
+        if (user == null) {
+            return callback(false); // Si no hay usuario, no puede comprar
+        }
+
+        let filter = { _id: songId };
+        songsRepository.findSong(filter, {}).then(song => {
+            if (!song) return callback(false);
+
+            // DEPURACIÓN: Mira esto en tu consola de Node.js
+            console.log("Usuario en sesión:", user);
+            console.log("Autor de la canción:", song.author);
+
+            // Comprobamos si es el autor (evitamos que compre su propia canción)
+            // Usamos trim() por si acaso hay espacios en blanco
+            let isAuthor = (song.author === user);
+
+            if (isAuthor) {
+                return callback(false);
+            }
+
+            // Si no es el autor, comprobamos si ya la compró
+            let purchaseFilter = { user: user, song_id: songId };
+            songsRepository.getPurchases(purchaseFilter, {}).then(purchases => {
+                // Si el array está vacío, puede comprar (true)
+                callback(purchases.length === 0);
+            });
+        }).catch(() => callback(false));
+    }
+
     app.get('/songs/:kind/:id', function (req, res) {
         let response = 'id: ' + req.params.id + '<br>'
             + 'Tipo de música: ' + req.params.kind;
