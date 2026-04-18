@@ -7,7 +7,43 @@ let bodyParser = require('body-parser');
 
 let indexRouter = require('./routes/index');
 
+
+let swaggerUi = require('swagger-ui-express');
+let swaggerJsdoc = require('swagger-jsdoc');
+let { Song } = require('./schemas/song.schema');
+let { SongRequest } = require('./schemas/songRequest.schema');
+
+const swaggerOptions = {
+    definition: {
+        openapi: '3.0.0',
+        info: {
+            title: 'API de la tienda de música de SDI',
+            version: '1.0.0',
+            description: 'Documentación interactiva de la API',
+        },
+        components: {
+            schemas: {
+                Song,
+                SongRequest
+            }
+        },
+        servers: [
+            {
+                url: 'http://localhost:3000',
+                description: 'Servidor de pruebas de la aplicación',
+            },
+        ],
+    },
+    // Esta ruta debe apuntar a donde tengas tus comentarios YAML/JSDoc
+    apis: ['./routes/api/*.js'],
+};
+
+const swaggerDocs = swaggerJsdoc(swaggerOptions);
+
+
 let app = express();
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 let rest = require('request');
 app.set('rest', rest);
