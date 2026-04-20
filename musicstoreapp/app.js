@@ -94,6 +94,7 @@ app.use("/songs/delete", userAuthorRouter);
 
 const userTokenRouter = require('./routes/userTokenRouter');
 app.use("/api/v1.0/songs/", userTokenRouter);
+app.use("/api/v1.0/itunes/favorites", userTokenRouter);
 
 const {MongoClient} = require("mongodb");
 const connectionStrings = 'mongodb+srv://admin:sdi@musicstoreapp.zhlojqd.mongodb.net/?appName=musicstoreapp';
@@ -107,6 +108,10 @@ favoriteSongsRepository.init(app, dbClient);
 
 const usersRepository = require("./repositories/usersRepository.js");
 usersRepository.init(app, dbClient);
+
+const itunesRepository = require("./repositories/itunesRepository.js");
+itunesRepository.init(app, dbClient);
+require("./routes/api/itunesAPI.js")(app, itunesRepository, favoriteSongsRepository);
 
 require("./routes/songs/favorites.js")(app, favoriteSongsRepository, songsRepository)
 require("./routes/songs.js")(app, songsRepository);
