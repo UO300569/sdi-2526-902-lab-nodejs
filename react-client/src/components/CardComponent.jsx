@@ -4,7 +4,7 @@ import {apiFetch} from "../services/ApiService.js";
 import Portada from "../assets/logo.svg";
 import Card from "./Card.jsx";
 
-const CardComponent = () => {
+const CardComponent = ({onSelectSong}) => {
     const [songs, setSongs] = useState([]);
 
     const loadSongs = () => {
@@ -23,8 +23,14 @@ const CardComponent = () => {
             <button onClick={loadSongs}>Actualizar</button>
         </div>
         <div className="card-container"> {songs.length === 0 ? (<p>No hay canciones</p>) : (songs.map(song => (
-            <Card key={song._id} titulo={song.title} autor={song.author} precio={song.price}
-                  imagen={Portada}/>)))} </div>
+            <Card
+                key={song._id}
+                titulo={song.title}
+                autor={song.author}
+                precio={song.price}
+                imagen={Portada}
+                onClick={() => onSelectSong(song._id)}/>)))}
+        </div>
     </div>);
 };
 export default CardComponent;
